@@ -6,6 +6,10 @@ name: CI
 # GitHub APIs, so this needs NO self-hosted runner and NO provider auth — it runs on a
 # hosted runner. The reusable `pi-pr-review.yml` is `on: workflow_call`, so it never
 # runs here directly; this is the only workflow that executes on push/PR.
+#
+# Every unit with a `tests/` directory is collected by the glob below, so a new
+# unit needs no CI edit. `action-smoke` runs each composite action through its
+# real `action.yml` against fixtures, which unit tests of the script cannot cover.
 
 on:
   push:
@@ -30,5 +34,32 @@ jobs:
       - name: Install test deps
         run: python -m pip install --quiet pytest pyyaml
 
-      - name: Run reviewer + gate tests
-        run: python -m pytest pi-review/tests -q
+      - name: Run unit tests
+        run: python -m pytest --import-mode=importlib -q */tests
+
+  action-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: release-please-lint passes on a good setup
+        uses: ./release-please-lint
+        with:
+          working-directory: release-please-lint/tests/fixtures/good
+          check-tags: "false"
+          ignore-tag-patterns: |
+            manual@v*
+
+      - name: release-please-lint fails on a bad tag trigger
+        id: rpl-bad
+        continue-on-error: true
+        uses: ./release-please-lint
+        with:
+          working-directory: release-please-lint/tests/fixtures/bad
+          check-tags: "false"
+
+      - name: Assert the bad setup failed
+        env:
+          OUTCOME: ${{ steps.rpl-bad.outcome }}
+        run: test "$OUTCOME" = failure

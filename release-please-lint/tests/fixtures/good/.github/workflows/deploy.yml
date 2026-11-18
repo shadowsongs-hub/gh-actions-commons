@@ -1,0 +1,4 @@
+on:
+  push:
+    tags: ['app-v*', 'manual@v*']
+jobs: {}

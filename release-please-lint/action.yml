@@ -1,0 +1,58 @@
+name: release-please lint
+description: >-
+  Fail when a release-please manifest setup would fail silently: a manifest
+  version with no tag (no release PR ever opens), or a workflow tag trigger
+  that release-please never produces (the deploy never runs).
+
+inputs:
+  working-directory:
+    description: Repo root to lint. Other paths are relative to it.
+    default: "."
+  config-file:
+    description: Path to the release-please config, relative to the repo root.
+    default: release-please-config.json
+  manifest-file:
+    description: Path to the release-please manifest, relative to the repo root.
+    default: .release-please-manifest.json
+  workflows-dir:
+    description: Directory whose workflows are scanned for `on.push.tags` triggers.
+    default: .github/workflows
+  ignore-tag-patterns:
+    description: >-
+      Newline-separated tag trigger patterns to skip, for tags that something
+      other than release-please pushes.
+    default: ""
+  check-tags:
+    description: >-
+      Check that each manifest version has its tag. Reads tags from `origin`
+      with `git ls-remote`, so a shallow checkout is fine.
+    default: "true"
+
+runs:
+  using: composite
+  steps:
+    - name: Run release-please lint
+      shell: bash
+      env:
+        RPL_ROOT: ${{ inputs.working-directory }}
+        RPL_CONFIG: ${{ inputs.config-file }}
+        RPL_MANIFEST: ${{ inputs.manifest-file }}
+        RPL_WORKFLOWS: ${{ inputs.workflows-dir }}
+        RPL_IGNORE: ${{ inputs.ignore-tag-patterns }}
+        RPL_CHECK_TAGS: ${{ inputs.check-tags }}
+      run: |
+        set -euo pipefail
+        py=python3
+        if ! "$py" -c 'import yaml' 2>/dev/null; then
+          # PyYAML is the only dependency. Install it into a private venv so
+          # the runner's Python is left alone.
+          "$py" -m venv "$RUNNER_TEMP/release-please-lint-venv"
+          py="$RUNNER_TEMP/release-please-lint-venv/bin/python"
+          "$py" -m pip install --quiet --disable-pip-version-check 'pyyaml==6.0.2'
+        fi
+        args=(--root "$RPL_ROOT" --config "$RPL_CONFIG" --manifest "$RPL_MANIFEST" --workflows-dir "$RPL_WORKFLOWS")
+        while IFS= read -r pattern; do
+          [ -n "$pattern" ] && args+=(--ignore-tag-pattern "$pattern")
+        done <<< "$RPL_IGNORE"
+        [ "$RPL_CHECK_TAGS" = "true" ] || args+=(--no-check-tags)
+        "$py" "$GITHUB_ACTION_PATH/lint.py" "${args[@]}"
