@@ -10,6 +10,7 @@ Shared, generic CI building blocks for GitHub Actions: reusable workflows and co
 | [`release-please-lint`](release-please-lint/) | Composite action | ✅ **Current** | Fails when a release-please setup would skip a release or never trigger a deploy. |
 | [`junit-go-dark-guard`](junit-go-dark-guard/) | Composite action | ✅ **Current** | Fails when a test suite ran nothing or skipped everything, which a test step reports as green. |
 | [`registry-tag-exists`](registry-tag-exists/) | Composite action | ✅ **Current** | Checks whether an image tag is already in a v2 registry, to publish each version once. |
+| [`sops-guard`](sops-guard/) | Composite action | ✅ **Current** | Fails on a committed plain `.env`, a partly encrypted SOPS file, or recipients that drifted from `.sops.yaml`. |
 | [`opencode-review`](opencode-review/) | Composite action | ⚠️ **Deprecated** | Former AI PR reviewer. Kept as a historical record — see [why](#opencode-review-deprecated). |
 
 ---

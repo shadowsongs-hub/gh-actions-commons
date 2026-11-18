@@ -1,0 +1,31 @@
+db:
+    password: ENC[AES256_GCM,data:4lhkBmeyGg==,iv:RrBPHviIYoOkDvlVLqjGXAgmKq1GC3AGXwm6LG0Zbwg=,tag:03bN2K9DCPgl0KiHXAvzJQ==,type:str]
+    port: 5432
+    debug_unencrypted: true
+list:
+    - a
+    - 3
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSAwRHorazNOYytCcHRXazB0
+            OGFCVHlHTmtBZkQ2ZXpJa0NYbVRTYXliY3pnCisvbzRZR3VGbm00WDVNTVkySW02
+            NW5zcU5xcFFmdk10Z0RjVHl0cUM4ZVEKLS0tIDdmalMrVU5WbGpUWFR3NlRWaEhO
+            eXJ3NUgzK1prMEtkWERjei80VVRrY1kKJI+Jw2NVOEcRdx13/dvPRsR9XNnVE7Za
+            IuZccaKhpWYl+VlgXoABlpIf6gIUJANLtW5WKVCj3QGr15aAzqvNUQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1nueqd25fd8wlyfnlm0nwm0qm0l6xjpx7ekhz6cxpjf93c4jwmswq8g8sla
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSA3MTl0KzdHVVV3WTJIVXFm
+            d3pWb3lHRFJzczZFMERpMVg0RUhuQjdmc2lFCnU3K05xczQwUDhEd21xOXVXdUJy
+            eVYzbXdsMnNXdEtMUkQvZWtrM25nK2cKLS0tIHFjSGZYbmwySzBFbUZBYXJoWkFt
+            TXJqNHl2QnB0eGZwSU5UTVUwbDF2QmcKj73qktCBm6VLg8Y6yT++SQBBWRZTy4zP
+            lrrBll4Z25N1/7RraGOJOfHDFAnCsq3XuoEJfEhxtBNtj4KbOy+elQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1cdvs3wxkg22l9r7s3h53g2map476xq9t8t8auyhsp7yrm643yszqx54eac
+    encrypted_regex: ^password$
+    lastmodified: "2026-11-18T04:34:23Z"
+    mac: ENC[AES256_GCM,data:/SSGbpUwJKf6svTrbXNrCsLqpP10+qJv+F2FNCj426ODVaQKv//ocFTuTkSqbORFcTYwZbAoBwTCFtAWTkhruLSju2KnbOHsGvLaT2LgdmuzPGJ867QaEFgsCoOnIwz7vC54kXt02/FSpitlCFfo8iZu5dHmgKLa26ge3sm/yoE=,iv:n1gYN/xk3VJYw9Y/SzKJraDMWq04kDYnK45ok4IW4p0=,tag:HHIKol1Uq0VeBVbpvF1lmw==,type:str]
+    version: 3.13.3

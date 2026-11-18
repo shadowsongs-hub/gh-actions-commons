@@ -1,0 +1,31 @@
+db:
+    password: ENC[AES256_GCM,data:TJ9aom1pIQ==,iv:aSmkjejicXCmIlS5ufydqeQL3bfoYh3UoJ8sFau0kb0=,tag:bunQIssLC4l0CuPAxkRcNg==,type:str]
+    port: ENC[AES256_GCM,data:xU7V3g==,iv:9eQSqj04qImvhr904jExFLTjGdV9XzyVLc5DSx1O0C4=,tag:dxvlCPIYyUQIhgNMqtCF4A==,type:int]
+    debug_unencrypted: true
+list:
+    - ENC[AES256_GCM,data:8w==,iv:OfOt7KXiBp4zzHorZfEm14tNMNpp2uunyCj5eu/I01Q=,tag:/SWk+SERsYKPdbtyqwg+vw==,type:str]
+    - ENC[AES256_GCM,data:cQ==,iv:WOGEO8ltYH2EiEIDF3kqmHqdAkxXzRlTQp5zwp0/cq4=,tag:XOsXpyc9F51M/vNbQLJm2A==,type:int]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBPZWJWclZ6dXp3VFZEQng3
+            c3ErTndIeWxWbEgzM05Ua2M4b2pSb0RZREVnCjVwK0N5LzJjV1NXQklXUmF1clVJ
+            WTU0NDZlenllMEsxbUd5UmU4Lytpdm8KLS0tIEM4dndFMnQzeC8yRng0TDFvSXVQ
+            K2J5dkZEVW5XS0dZTHN1MXB3cS9wYkUKRS7O6Q12aCokDwvqOTiRhAyzb6fKAXFJ
+            yQNmiXqRyQJ6IMnW2a4hraHLe9z5cYDxb13wo5A1NV4gG6fnUMLrgA==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1nueqd25fd8wlyfnlm0nwm0qm0l6xjpx7ekhz6cxpjf93c4jwmswq8g8sla
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBEc2VMOXFKVnNwZDhNS3RS
+            OHZmenA0K0g3czR0bDhFL3BnRXpjOWdYSVdzCkhIdFU3T2V4SXppWWpFaVhhV1RM
+            MmdKdWNTRDFlM1RLTXFUOFUrVXJVK0UKLS0tIFJKQjB0aExvbHJLSzdPZjlLQko5
+            ZC9PNU9PTUpTM2IvN3JnOTdEN3dpZU0Kw2PCH0kljuQhf+l3+UmvqnIesNZAUUDT
+            TnmmMf7XYmav1EsXdzbyjw0oDT/GbyKqOoVEsfBlmn2GRXc/3PuM2g==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1cdvs3wxkg22l9r7s3h53g2map476xq9t8t8auyhsp7yrm643yszqx54eac
+    lastmodified: "2026-11-18T04:34:23Z"
+    mac: ENC[AES256_GCM,data:43pt3A2cgi5OzQnZRPFKxk6Dtn2a4+Mf2+eFM1M7oHN2+9MqiEHXW3/wjgNsr5qFwfhAquPIanBNW2sJxH/e7+rD9kr4AR+xrwTPCTa/klMp321CedorFGl6udE8SGJ/32REKWlGycapvvMv7p/GkPxPQqtybPsUdn3EbcXiKZY=,iv:EhsFKqgFmtEOgWun/0kVkicpOjR2CCIlkS8t1exHoIg=,tag:0ClXDOlSOlyxlnmnX3yDAQ==,type:str]
+    unencrypted_suffix: _unencrypted
+    version: 3.13.3
