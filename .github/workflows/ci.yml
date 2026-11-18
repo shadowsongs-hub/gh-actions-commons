@@ -126,3 +126,37 @@ jobs:
           MISS: ${{ steps.rte-miss.outputs.exists }}
           DOWN: ${{ steps.rte-down.outcome }}
         run: test "$HIT" = true && test "$MISS" = false && test "$DOWN" = failure
+
+      - name: Build SOPS fixture repos
+        env:
+          K1: age1nueqd25fd8wlyfnlm0nwm0qm0l6xjpx7ekhz6cxpjf93c4jwmswq8g8sla
+          K2: age1cdvs3wxkg22l9r7s3h53g2map476xq9t8t8auyhsp7yrm643yszqx54eac
+        run: |
+          set -euo pipefail
+          for kind in good bad; do
+            dir="$RUNNER_TEMP/sops-$kind"
+            mkdir -p "$dir/secrets"
+            git -C "$dir" init -q
+            printf 'creation_rules:\n  - path_regex: ^secrets/\n    age: %s,%s\n' "$K1" "$K2" > "$dir/.sops.yaml"
+            cp sops-guard/tests/fixtures/app.enc.yaml sops-guard/tests/fixtures/app.env.encrypted "$dir/secrets/"
+          done
+          echo "A=secret" > "$RUNNER_TEMP/sops-bad/.env"
+          git -C "$RUNNER_TEMP/sops-good" add -A
+          git -C "$RUNNER_TEMP/sops-bad" add -A -f
+
+      - name: sops-guard passes on real SOPS files
+        uses: ./sops-guard
+        with:
+          working-directory: ${{ runner.temp }}/sops-good
+
+      - name: sops-guard fails on a committed .env
+        id: sg-bad
+        continue-on-error: true
+        uses: ./sops-guard
+        with:
+          working-directory: ${{ runner.temp }}/sops-bad
+
+      - name: Assert the sops-guard outcome
+        env:
+          OUTCOME: ${{ steps.sg-bad.outcome }}
+        run: test "$OUTCOME" = failure
