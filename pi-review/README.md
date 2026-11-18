@@ -43,7 +43,7 @@ on:
 
 jobs:
   pi-review:
-    uses: Shadowsong27/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
+    uses: shadowsongs-hub/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
     permissions:
       contents: read
       pull-requests: write
