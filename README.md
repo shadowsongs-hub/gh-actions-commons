@@ -1,6 +1,6 @@
 # gh-actions-commons
 
-Shared CI/CD building blocks for Shadowsong27 repositories.
+Shared, generic CI building blocks for GitHub Actions: reusable workflows and composite actions.
 
 ## Catalog
 
@@ -52,7 +52,7 @@ gh api /repos/<owner>/<repo>/actions/runners \
 > instruction covering preconditions, wiring, verification and failure triage:
 >
 > ```
-> Read https://github.com/Shadowsong27/gh-actions-commons/blob/main/pi-review/AGENT-SETUP.md
+> Read https://github.com/shadowsongs-hub/gh-actions-commons/blob/main/pi-review/AGENT-SETUP.md
 > and set up the pi.dev PR reviewer on this repository.
 > ```
 >
@@ -71,7 +71,7 @@ on:
 
 jobs:
   pi-review:
-    uses: Shadowsong27/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
+    uses: shadowsongs-hub/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
     permissions:
       contents: read
       pull-requests: write
@@ -182,7 +182,7 @@ on:
 
 jobs:
   pi-review:
-    uses: Shadowsong27/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
+    uses: shadowsongs-hub/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
     permissions:
       contents: read
       pull-requests: write
@@ -244,7 +244,7 @@ on:
 
 jobs:
   pi-review:
-    uses: Shadowsong27/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
+    uses: shadowsongs-hub/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
     # ... permissions as above ...
     with:
       pi-models: <your-chain>
@@ -282,7 +282,7 @@ pi reports a quota outage and an unregistered model the same way, so the fallbac
 ```yaml
 jobs:
   pi-review:
-    uses: Shadowsong27/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
+    uses: shadowsongs-hub/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
     # ... permissions as above ...
     with:
       pi-models: <your-chain>
@@ -426,9 +426,9 @@ Usage details and inputs, for the record: [`opencode-review/README.md`](opencode
 ## Contributing
 
 - **Composite actions** live in their own top-level directory with an `action.yml` and a
-  local `README.md`, and are consumed as `Shadowsong27/gh-actions-commons/<name>@<ref>`.
+  local `README.md`, and are consumed as `shadowsongs-hub/gh-actions-commons/<name>@<ref>`.
 - **Reusable workflows** live in `.github/workflows/` with `on: workflow_call`, and are
-  consumed as `Shadowsong27/gh-actions-commons/.github/workflows/<file>@<ref>`. Any
+  consumed as `shadowsongs-hub/gh-actions-commons/.github/workflows/<file>@<ref>`. Any
   supporting assets get a sibling top-level directory with its own `README.md` (see
   [`pi-review/`](pi-review/)).
 

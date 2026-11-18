@@ -17,7 +17,7 @@ An automated PR reviewer. On every non-draft, same-repo pull request it runs the
 [pi](https://pi.dev) coding agent over the diff *plus the surrounding checkout*, then
 posts one comment containing findings and token usage.
 
-It is a **reusable workflow** consumed from `Shadowsong27/gh-actions-commons`. You add
+It is a **reusable workflow** consumed from `shadowsongs-hub/gh-actions-commons`. You add
 **one file** to the target repo. Do not copy the reviewer's internals.
 
 ---
@@ -108,7 +108,7 @@ on:
 
 jobs:
   pi-review:
-    uses: Shadowsong27/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
+    uses: shadowsongs-hub/gh-actions-commons/.github/workflows/pi-pr-review.yml@main
     permissions:
       contents: read
       pull-requests: write
@@ -216,11 +216,11 @@ This repo publishes no tags, so `@main` is the only moving ref. For a third-part
 dependency in your CI, prefer a full commit SHA:
 
 ```bash
-gh api repos/Shadowsong27/gh-actions-commons/commits/main --jq .sha
+gh api repos/shadowsongs-hub/gh-actions-commons/commits/main --jq .sha
 ```
 
 ```yaml
-uses: Shadowsong27/gh-actions-commons/.github/workflows/pi-pr-review.yml@<full-sha>
+uses: shadowsongs-hub/gh-actions-commons/.github/workflows/pi-pr-review.yml@<full-sha>
 ```
 
 The workflow fetches its own prompt and extractor at the commit of the workflow file you

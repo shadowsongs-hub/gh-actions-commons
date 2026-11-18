@@ -601,7 +601,7 @@ jobs:
         continue-on-error: true
         uses: actions/checkout@v4
         with:
-          repository: Shadowsong27/gh-actions-commons
+          repository: shadowsongs-hub/gh-actions-commons
           ref: ${{ job.workflow_sha }}
           path: .gha-commons
           persist-credentials: false
@@ -610,7 +610,7 @@ jobs:
         if: steps.assets-pinned.outcome != 'success'
         uses: actions/checkout@v4
         with:
-          repository: Shadowsong27/gh-actions-commons
+          repository: shadowsongs-hub/gh-actions-commons
           ref: ${{ inputs.commons-ref }}
           path: .gha-commons
           persist-credentials: false
