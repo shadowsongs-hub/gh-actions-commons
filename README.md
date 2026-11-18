@@ -134,7 +134,7 @@ Then, optionally:
 | `repo-prompt-file` | `.github/opencode-pr-review-prompt.md` | Path in **your** repo with additive repo-specific rules. Skipped silently if absent. |
 | `base-prompt-file` | `""` | Path in **your** repo that *replaces* the shared base prompt wholesale. Prefer `repo-prompt-file`; a declared-but-missing file fails the job loudly. |
 | `commons-ref` | `main` | Fallback ref for fetching the shared prompt/extractor. Normally unused — see below. |
-| `required-workflows` | `""` | **Cost gate 1** (workflow_run callers only). Space/comma-separated CI workflow **names** that must all be green on the reviewed commit. Empty = the workflow that fired the event — correct for a repo with **one** CI workflow. Multi-CI-workflow repos must list them all. See [Cost gates](#cost-gates-opt-in). |
+| `required-workflows` | `""` | **Cost gate 1** (workflow_run callers only). Comma- or newline-separated CI workflow **names** (a name may contain spaces, so a space does not separate) that must all be green on the reviewed commit. Empty = the workflow that fired the event — correct for a repo with **one** CI workflow. Multi-CI-workflow repos must list them all. See [Cost gates](#cost-gates-opt-in). |
 | `skip-paths` | `""` | **Cost gate 2.** Newline/comma-separated globs (`*`, `?`, `**`). When **every** changed file matches, the review is skipped with no model call. Empty = never skip. |
 | `skip-comment` | `true` | When a PR is skipped by `skip-paths`, post one upserted note comment so the skip is visible. `false` = skip silently. |
 | `pr-number` | `""` | **Rebuttal re-review** (workflow_dispatch callers only). The PR to re-review. Forward your caller's own dispatch input. See [Rebuttal re-review](#rebuttal-re-review-opt-in). |

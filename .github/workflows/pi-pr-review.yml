@@ -123,8 +123,8 @@ on:
         default: main
       required-workflows:
         description: >-
-          Gate 1 (workflow_run mode only). Space- or comma-separated CI workflow NAMES
-          (the `name:` field, not the filename) that must ALL have a successful run on the
+          Gate 1 (workflow_run mode only). Comma- or newline-separated CI workflow NAMES
+          (the `name:` field, not the filename; a name may contain spaces) that must ALL have a successful run on the
           reviewed commit before a model call is spent. Empty (default) means "the workflow
           that triggered this event", which is correct for a repo with a SINGLE CI
           workflow. A repo with MULTIPLE CI workflows MUST list every one here, otherwise
