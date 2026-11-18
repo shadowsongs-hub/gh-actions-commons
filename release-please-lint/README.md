@@ -6,7 +6,7 @@ find out when a release does not happen.
 
 | Check | What goes wrong without it |
 |-------|----------------------------|
-| A manifest version has no matching tag | release-please treats the version as released, finds no release, and opens no release PR. A new package that starts at `0.1.0` instead of `0.0.0` is never released. |
+| A manifest version has no matching tag | release-please finds no release for that version. It skips the package ("No commits for path"), or proposes a bump past it. Either way the version is never released, so a new package that starts at `0.1.0` instead of `0.0.0` never gets its first release. |
 | No `on.push.tags` pattern in a workflow matches a tag release-please creates | The release PR merges and the tag is pushed, but the deploy never runs. Example: the trigger says `app@v*` while the config emits `app-v1.2.3`. A workflow that lists a manual pattern beside a matching one passes. |
 | The manifest lists a package the config does not | Stale entry. |
 | A package path does not exist, or a manifest version is not semver | Broken config. |
