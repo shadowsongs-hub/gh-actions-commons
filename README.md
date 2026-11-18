@@ -7,6 +7,7 @@ Shared CI/CD building blocks for Shadowsong27 repositories.
 | Unit | Kind | Status | Purpose |
 |------|------|--------|---------|
 | [`pi-pr-review`](.github/workflows/pi-pr-review.yml) | Reusable workflow | ✅ **Current** | AI PR review via [pi.dev](https://pi.dev). Two-job, hardened. |
+| [`release-please-lint`](release-please-lint/) | Composite action | ✅ **Current** | Fails when a release-please setup would skip a release or never trigger a deploy. |
 | [`opencode-review`](opencode-review/) | Composite action | ⚠️ **Deprecated** | Former AI PR reviewer. Kept as a historical record — see [why](#opencode-review-deprecated). |
 
 ---
