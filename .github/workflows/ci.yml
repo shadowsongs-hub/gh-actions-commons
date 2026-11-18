@@ -40,6 +40,11 @@ jobs:
   action-smoke:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    services:
+      registry:
+        image: registry:2
+        ports:
+          - 5000:5000
     steps:
       - uses: actions/checkout@v4
 
@@ -83,3 +88,41 @@ jobs:
           SKIPPED: ${{ steps.gdg-ok.outputs.skipped }}
           OUTCOME: ${{ steps.gdg-bad.outcome }}
         run: test "$TESTS" = 3 && test "$SKIPPED" = 1 && test "$OUTCOME" = failure
+
+      - name: Push a fixture image to the local registry
+        run: |
+          docker pull --quiet busybox:1.36
+          docker tag busybox:1.36 localhost:5000/smoke:1.0.0
+          docker push --quiet localhost:5000/smoke:1.0.0
+
+      - name: registry-tag-exists finds a pushed tag
+        id: rte-hit
+        uses: ./registry-tag-exists
+        with:
+          image: localhost:5000/smoke
+          tag: 1.0.0
+          insecure: "true"
+
+      - name: registry-tag-exists misses an unpushed tag
+        id: rte-miss
+        uses: ./registry-tag-exists
+        with:
+          image: localhost:5000/smoke
+          tag: 2.0.0
+          insecure: "true"
+
+      - name: registry-tag-exists fails when the registry is down
+        id: rte-down
+        continue-on-error: true
+        uses: ./registry-tag-exists
+        with:
+          image: localhost:5999/smoke
+          tag: 1.0.0
+          insecure: "true"
+
+      - name: Assert the registry outcomes
+        env:
+          HIT: ${{ steps.rte-hit.outputs.exists }}
+          MISS: ${{ steps.rte-miss.outputs.exists }}
+          DOWN: ${{ steps.rte-down.outcome }}
+        run: test "$HIT" = true && test "$MISS" = false && test "$DOWN" = failure

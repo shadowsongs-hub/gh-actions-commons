@@ -1,0 +1,51 @@
+name: registry tag exists
+description: >-
+  Check whether an image tag already exists in an OCI / Docker v2 registry,
+  to gate a publish step. Registry errors fail the step by default.
+
+inputs:
+  image:
+    description: Image without a tag, for example `ghcr.io/org/app` or `10.0.0.5:5000/app`. No host means Docker Hub.
+    required: true
+  tag:
+    description: Tag to look for.
+    required: true
+  insecure:
+    description: Talk to the registry over plain HTTP.
+    default: "false"
+  username:
+    description: Registry user. Leave empty for anonymous access.
+    default: ""
+  password:
+    description: Registry password or token. Pass it from a secret.
+    default: ""
+  on-error:
+    description: >-
+      What a registry error means. `fail` (default) fails the step.
+      `missing` reports `exists=false`, so the caller publishes.
+      `exists` reports `exists=true`, so the caller skips.
+    default: fail
+
+outputs:
+  exists:
+    description: "`true` when the tag exists, else `false`."
+    value: ${{ steps.check.outputs.exists }}
+
+runs:
+  using: composite
+  steps:
+    - name: Look up the tag
+      id: check
+      shell: bash
+      env:
+        RTE_IMAGE: ${{ inputs.image }}
+        RTE_TAG: ${{ inputs.tag }}
+        RTE_INSECURE: ${{ inputs.insecure }}
+        RTE_ON_ERROR: ${{ inputs.on-error }}
+        REGISTRY_USERNAME: ${{ inputs.username }}
+        REGISTRY_PASSWORD: ${{ inputs.password }}
+      run: |
+        set -euo pipefail
+        args=("$RTE_IMAGE" "$RTE_TAG" --on-error "$RTE_ON_ERROR")
+        [ "$RTE_INSECURE" = "true" ] && args+=(--insecure)
+        python3 "$GITHUB_ACTION_PATH/check.py" "${args[@]}"
