@@ -34,6 +34,11 @@ jobs:
       - uses: shadowsongs-hub/gh-actions-commons/release-please-lint@main
 ```
 
+The tag check skips release-please's own changes: a PR from a `release-please--*` branch,
+and a push whose commit is a release-please merge (`chore(main): release …` or a merge from
+`release-please--branches--…`). Those bump the manifest before the tag exists, so they are
+expected to be untagged. The trigger and structure checks still run.
+
 A shallow checkout is enough. Tags are read from `origin` with `git ls-remote`, and from
 local tags if `origin` is not reachable.
 
@@ -69,3 +74,5 @@ python release-please-lint/lint.py --root /path/to/repo
 - Only `on.push.tags` triggers are checked. Workflows that start from `release` events or
   `workflow_run` are not.
 - `bootstrap-sha` and `last-release-sha` are not taken into account.
+- A push that lands in the minute between a release merge and release-please creating its
+  tag can fail the tag check. Re-run it once the tag exists.

@@ -92,6 +92,46 @@ def test_manifest_version_without_tag_is_an_error(repo: Path):
     assert "tag 'app-v0.1.0' does not exist" in msg
 
 
+@pytest.mark.parametrize(
+    ("env", "message"),
+    [
+        ({"GITHUB_HEAD_REF": "release-please--branches--main--components--app"}, "c"),
+        ({"GITHUB_EVENT_NAME": "push"}, "chore(main): release app 0.1.0 (#7)"),
+        ({"GITHUB_EVENT_NAME": "push"}, "chore: release main"),
+        (
+            {"GITHUB_EVENT_NAME": "push"},
+            "Merge pull request #7 from o/release-please--branches--main\n\nchore(main): release",
+        ),
+    ],
+)
+def test_release_please_changes_skip_the_tag_check(repo, monkeypatch, env, message):
+    write(repo, APP, {"apps/app": "0.1.0"})
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", message)
+    for k, v in env.items():
+        monkeypatch.setenv(k, v)
+    assert run(repo).errors == []
+
+
+@pytest.mark.parametrize(
+    ("env", "message"),
+    [
+        ({"GITHUB_HEAD_REF": "feat/add-app"}, "feat(app): add app"),
+        ({"GITHUB_EVENT_NAME": "push"}, "feat(app): mention a release in passing"),
+        ({"GITHUB_EVENT_NAME": "pull_request"}, "chore(main): release app 0.1.0"),
+    ],
+)
+def test_other_changes_keep_the_tag_check(repo, monkeypatch, env, message):
+    write(repo, APP, {"apps/app": "0.1.0"})
+    git(repo, "add", "-A")
+    git(repo, "commit", "-q", "-m", message)
+    monkeypatch.delenv("GITHUB_HEAD_REF", raising=False)
+    monkeypatch.delenv("GITHUB_EVENT_NAME", raising=False)
+    for k, v in env.items():
+        monkeypatch.setenv(k, v)
+    assert len(run(repo).errors) == 1
+
+
 def test_tag_check_can_be_disabled(repo: Path):
     write(repo, APP, {"apps/app": "0.1.0"})
     assert run(repo, check_tags=False).errors == []
