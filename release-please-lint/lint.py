@@ -2,9 +2,10 @@
 
 Each check below matches a failure that release-please does not report:
 
-* A manifest entry claims a version that has no tag. release-please treats the
-  version as already released, finds no release to diff against, and opens no
-  PR. The first release of a new package never happens.
+* A manifest entry claims a version that has no tag. release-please finds no
+  release for it, then either skips the package ("No commits for path") or
+  proposes a bump past it. Either way that version is never released, and the
+  first release of a new package never happens.
 * A workflow triggers only on tag patterns that release-please never produces,
   for example `app@v*` when the config emits `app-v1.2.3`. The release PR merges,
   the tag is pushed, and the deploy never runs.
@@ -251,7 +252,8 @@ def lint(
             report.error(
                 manifest_file,
                 f"'{path}' is at {version} but tag '{tag}' does not exist. release-please "
-                "treats this version as released and will open no release PR. For a new "
+                f"finds no release for {version}: it skips the package or proposes a bump "
+                f"past it, so {version} is never released. For a new "
                 f"package set the version to 0.0.0 (or drop the entry); otherwise push the "
                 f"missing tag: git tag {tag} <sha> && git push origin {tag}",
             )
