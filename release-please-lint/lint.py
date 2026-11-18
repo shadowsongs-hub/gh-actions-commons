@@ -189,6 +189,30 @@ def existing_tags(root: Path) -> tuple[set[str], str]:
     return set(local.stdout.split()), "local"
 
 
+RELEASE_COMMIT = re.compile(r"^chore(\([^)]*\))?: release ")
+
+
+def release_please_change(root: Path, env: dict[str, str]) -> str | None:
+    """Why this run is release-please's own change, or None.
+
+    A release PR bumps the manifest to a version whose tag does not exist yet,
+    and its merge push runs before release-please creates the tag. Both are
+    expected to be untagged, so the tag check skips them. Detection uses
+    release-please's fixed branch prefix and release commit subject.
+    """
+    head_ref = env.get("GITHUB_HEAD_REF", "")
+    if head_ref.startswith("release-please--"):
+        return f"release-please PR branch {head_ref}"
+    if env.get("GITHUB_EVENT_NAME") != "push":
+        return None
+    message = subprocess.run(
+        ["git", "-C", str(root), "log", "-1", "--format=%B"], capture_output=True, text=True
+    ).stdout
+    if "release-please--branches--" in message or RELEASE_COMMIT.match(message):
+        return "release-please release commit"
+    return None
+
+
 def lint(
     root: Path,
     config_file: str,
@@ -236,6 +260,9 @@ def lint(
             )
 
     tags: set[str] = set()
+    if check_tags and (reason := release_please_change(root, dict(os.environ))):
+        print(f"release-please-lint: tag check skipped for this {reason}")
+        check_tags = False
     if check_tags:
         tags, source = existing_tags(root)
         print(f"release-please-lint: {len(tags)} tags read from {source}")
