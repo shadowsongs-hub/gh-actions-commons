@@ -5,8 +5,8 @@ Each check below matches a failure that release-please does not report:
 * A manifest entry claims a version that has no tag. release-please treats the
   version as already released, finds no release to diff against, and opens no
   PR. The first release of a new package never happens.
-* A workflow triggers on a tag pattern that release-please never produces, for
-  example `app@v*` when the config emits `app-v1.2.3`. The release PR merges,
+* A workflow triggers only on tag patterns that release-please never produces,
+  for example `app@v*` when the config emits `app-v1.2.3`. The release PR merges,
   the tag is pushed, and the deploy never runs.
 * The manifest and the config disagree on which packages exist, a package path
   is missing on disk, or a manifest version is not semver.
@@ -257,19 +257,25 @@ def lint(
             )
 
     expected = [t for p in packages if (t := p.tag(SAMPLE_VERSION)) is not None]
+    by_workflow: dict[str, list[str]] = {}
     for wf, pattern in workflow_tag_patterns(root / workflows_dir):
-        if pattern in ignore_patterns or not expected:
+        if pattern not in ignore_patterns:
+            by_workflow.setdefault(wf, []).append(pattern)
+    for wf, patterns in by_workflow.items():
+        # A workflow may list release-please tags beside manually pushed ones.
+        # It is broken only when no pattern can fire from a release.
+        if not expected or any(
+            github_filter_regex(p).match(t) for p in patterns for t in expected
+        ):
             continue
-        regex = github_filter_regex(pattern)
-        if not any(regex.match(t) for t in expected):
-            rel = os.path.relpath(wf, root)
-            report.error(
-                rel,
-                f"tag trigger '{pattern}' matches no tag release-please creates "
-                f"(it creates tags like {', '.join(sorted(expected))}). The workflow will "
-                "never run from a release. Fix the pattern, or pass it in "
-                "ignore-tag-patterns if the tag is pushed by something else.",
-            )
+        listed = ", ".join(f"'{p}'" for p in patterns)
+        report.error(
+            os.path.relpath(wf, root),
+            f"no tag trigger ({listed}) matches a tag release-please creates "
+            f"(it creates tags like {', '.join(sorted(expected))}). The workflow will "
+            "never run from a release. Fix the pattern, or pass it in "
+            "ignore-tag-patterns if the tag is pushed by something else.",
+        )
     return report
 
 

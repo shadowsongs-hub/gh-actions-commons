@@ -110,7 +110,14 @@ def test_trigger_with_wrong_separator_is_an_error(repo: Path):
     write(repo, APP, {"apps/app": "0.0.0"}, {"deploy.yml": deploy_on_tags("app@v*")})
     [(file, msg)] = run(repo).errors
     assert file == ".github/workflows/deploy.yml"
-    assert "'app@v*' matches no tag" in msg and "app-v1.2.3" in msg
+    assert "no tag trigger ('app@v*') matches" in msg and "app-v1.2.3" in msg
+
+
+def test_manual_pattern_beside_a_release_pattern_passes(repo: Path):
+    # asp-trader: manual tags use '@v', release-please tags use '-v'.
+    workflows = {"deploy.yml": deploy_on_tags("app@v*", "app-v*")}
+    write(repo, APP, {"apps/app": "0.0.0"}, workflows)
+    assert run(repo).errors == []
 
 
 def test_custom_tag_separator_is_honoured(repo: Path):
