@@ -63,3 +63,23 @@ jobs:
         env:
           OUTCOME: ${{ steps.rpl-bad.outcome }}
         run: test "$OUTCOME" = failure
+
+      - name: junit-go-dark-guard passes on a mixed report
+        id: gdg-ok
+        uses: ./junit-go-dark-guard
+        with:
+          report: junit-go-dark-guard/tests/fixtures/mixed.xml
+
+      - name: junit-go-dark-guard fails when every test skipped
+        id: gdg-bad
+        continue-on-error: true
+        uses: ./junit-go-dark-guard
+        with:
+          report: junit-go-dark-guard/tests/fixtures/all-skipped.xml
+
+      - name: Assert the guard outcomes and outputs
+        env:
+          TESTS: ${{ steps.gdg-ok.outputs.tests }}
+          SKIPPED: ${{ steps.gdg-ok.outputs.skipped }}
+          OUTCOME: ${{ steps.gdg-bad.outcome }}
+        run: test "$TESTS" = 3 && test "$SKIPPED" = 1 && test "$OUTCOME" = failure

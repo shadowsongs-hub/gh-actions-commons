@@ -1,0 +1,44 @@
+name: junit go-dark guard
+description: >-
+  Fail when a test suite went dark: no JUnit report, zero test cases, or every
+  test case skipped. Run it after the test step with `if: always()`.
+
+inputs:
+  report:
+    description: >-
+      JUnit XML report path, or a glob such as `reports/**/*.xml`. Several
+      paths may be given, one per line. Counts are summed across files.
+    required: true
+  min-tests:
+    description: Fail when fewer test cases than this ran.
+    default: "1"
+  allow-all-skipped:
+    description: Pass even when every test case was skipped.
+    default: "false"
+
+outputs:
+  tests:
+    description: Number of test cases in the reports.
+    value: ${{ steps.guard.outputs.tests }}
+  skipped:
+    description: Number of skipped test cases.
+    value: ${{ steps.guard.outputs.skipped }}
+
+runs:
+  using: composite
+  steps:
+    - name: Check the JUnit report
+      id: guard
+      shell: bash
+      env:
+        GDG_REPORT: ${{ inputs.report }}
+        GDG_MIN_TESTS: ${{ inputs.min-tests }}
+        GDG_ALLOW_ALL_SKIPPED: ${{ inputs.allow-all-skipped }}
+      run: |
+        set -euo pipefail
+        args=(--min-tests "$GDG_MIN_TESTS")
+        [ "$GDG_ALLOW_ALL_SKIPPED" = "true" ] && args+=(--allow-all-skipped)
+        while IFS= read -r report; do
+          [ -n "$report" ] && args+=("$report")
+        done <<< "$GDG_REPORT"
+        python3 "$GITHUB_ACTION_PATH/guard.py" "${args[@]}"
