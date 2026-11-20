@@ -755,10 +755,17 @@ cat > "$prefix/node_modules/.bin/claude" <<'STUB'
 import json, os, sys
 sys.stdin.read()
 open(os.environ["CLAUDE_ARGV_LOG"], "w").write(json.dumps(sys.argv[1:]))
+with open(os.environ["CLAUDE_ARGV_LOG"] + ".all", "a") as calls:
+    calls.write(json.dumps(sys.argv[1:]) + "\n")
 if os.environ.get("CLAUDE_ENV_LOG"):
     keys = ["ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_BASE_URL", "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB"]
     open(os.environ["CLAUDE_ENV_LOG"], "w").write(json.dumps({k: os.environ.get(k) for k in keys}))
 mode = os.environ.get("CLAUDE_STUB_MODE", "good")
+resumed = "--resume" in sys.argv
+if mode == "unusable_then_good":
+    mode = "good" if resumed else "unusable"
+elif mode == "unusable_twice":
+    mode = "unusable"
 if mode == "good":
     out = {"is_error": False, "result": "## Findings\n\nNo findings.",
            "usage": {"input_tokens": 50, "output_tokens": 7,
@@ -768,7 +775,8 @@ elif mode == "leak":
 elif mode == "error":
     out = {"is_error": True, "result": "rate limited"}
 else:
-    out = {"is_error": False, "result": "I could not review this."}
+    out = {"is_error": False, "result": "The earlier finding is fixed.", "session_id": "sess-1",
+           "usage": {"input_tokens": 100, "output_tokens": 20}}
 print(json.dumps(out))
 STUB
 chmod +x "$prefix/node_modules/.bin/claude"
@@ -812,6 +820,13 @@ def _run_decide(tmp_path: Path, model_line: str | None, *, prompt: bool = True) 
 def _run_claude(
     tmp_path: Path, mode: str, token: str = _FAKE_TOKEN, **extra_env: str
 ) -> tuple[Path, int, list]:
+    runner_temp, rc, argv, _ = _run_claude_full(tmp_path, mode, token, **extra_env)
+    return runner_temp, rc, argv
+
+
+def _run_claude_full(
+    tmp_path: Path, mode: str, token: str = _FAKE_TOKEN, **extra_env: str
+) -> tuple[Path, int, list, str]:
     runner_temp = tmp_path / "runner"
     _stage_pi_artifact(runner_temp, "NONE — every model failed: a,b")
     bindir = tmp_path / "bin"
@@ -843,7 +858,7 @@ def _run_claude(
         text=True,
     )
     argv = json.loads(argv_log.read_text()) if argv_log.exists() else []
-    return runner_temp, proc.returncode, argv
+    return runner_temp, proc.returncode, argv, proc.stdout + proc.stderr
 
 
 class TestClaudeFallbackDecide:
@@ -893,6 +908,38 @@ class TestClaudeFallbackRun:
         assert rc != 0
         assert not (rt / "claude-review.md").exists()
         assert not (rt / "claude-model.txt").exists()
+
+    def test_reply_without_findings_is_asked_again_in_the_same_session(
+        self, tmp_path: Path
+    ) -> None:
+        """A reply without `## Findings` resumes its session once (PR #814 round 2)."""
+        rt, rc, _ = _run_claude(tmp_path, "unusable_then_good")
+        assert rc == 0
+        calls = [json.loads(line) for line in (tmp_path / "argv.json.all").read_text().splitlines()]
+        assert len(calls) == 2
+        assert "--resume" not in calls[0]
+        assert calls[1][calls[1].index("--resume") + 1] == "sess-1"
+        # The retry keeps the same model, tools and sandbox flags.
+        assert calls[1][calls[1].index("--model"):] == calls[0][calls[0].index("--model"):]
+        review = (rt / "claude-review.md").read_text()
+        assert review.startswith("## Findings")
+        # Token usage counts both calls: 61 for the retry plus 120 for the first reply.
+        assert "Total tokens: `181`" in review
+
+    def test_second_reply_without_findings_fails_and_logs_the_reply(
+        self, tmp_path: Path
+    ) -> None:
+        rt, rc, _, err = _run_claude_full(tmp_path, "unusable_twice")
+        assert rc != 0
+        assert len((tmp_path / "argv.json.all").read_text().splitlines()) == 2
+        assert not (rt / "claude-review.md").exists()
+        assert "--- rejected claude reply ---" in err
+        assert "The earlier finding is fixed." in err
+
+    def test_error_reply_is_not_retried(self, tmp_path: Path) -> None:
+        _, rc, _ = _run_claude(tmp_path, "error")
+        assert rc != 0
+        assert len((tmp_path / "argv.json.all").read_text().splitlines()) == 1
 
     def test_token_leak_is_refused(self, tmp_path: Path) -> None:
         rt, rc, _ = _run_claude(tmp_path, "leak")
